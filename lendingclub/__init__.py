@@ -35,6 +35,11 @@ from bs4 import BeautifulSoup
 from lendingclub.filters import Filter, FilterByLoanID, SavedFilter
 from lendingclub.session import Session
 
+import sys
+PY3 = sys.version_info > (3,)
+if PY3:
+    unicode = str
+
 
 class LendingClub:
     """

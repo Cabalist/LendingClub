@@ -27,14 +27,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+import sys
+PY3 = sys.version_info > (3,)
 
 import os
 import json
-import urlparse
 import cgi
-import SocketServer
 from threading import Thread
-from BaseHTTPServer import BaseHTTPRequestHandler
+
+if PY3:
+    from urllib.parse import urlparse, parse_qs
+    import socketserver
+    from http.server import BaseHTTPRequestHandler
+else:
+    from urlparse import urlparse, parse_qs
+    import SocketServer as socketserver
+    from BaseHTTPServer import BaseHTTPRequestHandler
 
 logging = None
 http_session = {}
@@ -64,7 +72,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         if logging is not None:
             logging.debug(msg)
         else:
-            print '{0}\n'.format(msg)
+            print('{0}\n'.format(msg))
 
     def start(self):
         """
@@ -127,7 +135,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         if not session_disabled:
             http_session[key] = value
 
-        print 'Add to session: {0}={1}'.format(key, value)
+        print('Add to session: {0}={1}'.format(key, value))
 
     def output_file(self, file_name):
         """
@@ -160,9 +168,9 @@ class TestServerHandler(BaseHTTPRequestHandler):
         """
         Separate the path from the query
         """
-        url = urlparse.urlparse(self.path)
+        url = urlparse(self.path)
         self.path = url.path
-        self.query = urlparse.parse_qs(url.query)
+        self.query = parse_qs(url.query)
 
         # Flatten query string values
         for key, values in self.query.iteritems():
@@ -219,7 +227,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
             if 'lending_match_point' in http_session:
                 self.output_file('portfolio_getPortfolio.json')
             else:
-                print 'lending_match_point was not set'
+                print('lending_match_point was not set')
                 self.write('{"error": "The lending match point was not set"}')
 
         # Saved filters
@@ -305,7 +313,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
             if 'struts.token' in data and data['struts.token'].strip() != '':
                 self.output_file('orderConfirmed.html')
             else:
-                print "No struts token passed"
+                print("No struts token passed")
                 self.write('{"error": "No struts token passed"}')
 
         # Assign to portfolio
@@ -376,7 +384,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
             self.write('Unknown delete action: {0}'.format(self.path))
 
 
-class ReusableServer(SocketServer.TCPServer):
+class ReusableServer(socketserver.TCPServer):
     allow_reuse_address = True
 
 
@@ -391,12 +399,12 @@ class TestWebServer:
         pass
 
     def start(self):
-        print 'Starting server at 127.0.0.1:8000'
+        print('Starting server at 127.0.0.1:8000')
         self.http = ReusableServer(('127.0.0.1', 8000), TestServerHandler)
         self.http.serve_forever()
 
     def stop(self):
-        print 'Stopping server...'
+        print('Stopping server...')
         self.http.shutdown()
         self.http = None
 
@@ -416,7 +424,7 @@ class ServerThread:
 
     def start(self):
         self.thread.start()
-        print 'Server thread started'
+        print('Server thread started')
 
     def stop(self):
         self.httpd.stop()
@@ -431,5 +439,5 @@ if __name__ == '__main__':
     try:
         server.start()
     except KeyboardInterrupt:
-        print '\nShutting down the test server'
+        print('\nShutting down the test server')
         server.stop()

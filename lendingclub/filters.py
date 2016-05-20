@@ -70,6 +70,12 @@ import re
 import json
 from pybars import Compiler
 
+import sys
+PY3 = sys.version_info > (3,)
+if PY3:
+    unicode = str
+
+
 
 class Filter(dict):
     """
@@ -633,7 +639,7 @@ class SavedFilter(Filter):
 
         return filter_values
 
-    def __normalize():
+    def __normalize(self):
         pass
 
     def search_string(self):
@@ -692,7 +698,7 @@ class FilterByLoanID(Filter):
         this_path = os.path.dirname(os.path.realpath(__file__))
         self.tmpl_file = os.path.join(this_path, 'filter.handlebars')
 
-    def __normalize():
+    def __normalize(self):
         pass
 
 

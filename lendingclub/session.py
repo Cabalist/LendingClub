@@ -36,6 +36,7 @@ import getpass
 import time as time
 from bs4 import BeautifulSoup
 from requests.exceptions import *
+from builtins import input
 
 
 class Session:
@@ -150,7 +151,7 @@ class Session:
 
         # Get them from the user
         if email is None:
-            email = raw_input('Email:')
+            email = input('Email:')
             self.email = email
         if password is None:
             password = getpass.getpass()
@@ -284,7 +285,7 @@ class Session:
 
         except (RequestException, ConnectionError, TooManyRedirects, HTTPError) as e:
             raise NetworkError('{0} failed to: {1}'.format(method, url), e)
-        except Timeout:
+        except Timeout as e:
             raise NetworkError('{0} request timed out: {1}'.format(method, url), e)
 
         return request
