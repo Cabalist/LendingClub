@@ -1106,7 +1106,7 @@ class Order:
             raise LendingClubError('Could not stage the loans. The number of loans in your batch does not match totalRecords. {0} != {1}'.format(len(self.loans), results['totalRecords']), results)
 
         # Stage each loan
-        for loan_id, amount in self.loans.iteritems():
+        for loan_id, amount in self.loans.items():
             payload = {
                 'method': 'addToPortfolio',
                 'loan_id': loan_id,

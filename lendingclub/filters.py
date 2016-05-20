@@ -166,7 +166,7 @@ class Filter(dict):
         """
         Merge dictionary objects recursively, by only updating keys existing in to_dict
         """
-        for key, value in from_dict.iteritems():
+        for key, value in from_dict.items():
 
             # Only if the key already exists
             if key in to_dict:
@@ -301,7 +301,7 @@ class Filter(dict):
         }
 
         # Throw an error if the loan does not contain one of the criteria keys that this filter has
-        for key, criteria in req.iteritems():
+        for key, criteria in req.items():
             if criteria in self and key not in loan:
                 raise FilterValidationError('Loan does not have a "{0}" value.'.format(key), loan, criteria)
 

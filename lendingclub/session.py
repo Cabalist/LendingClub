@@ -30,17 +30,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import re
-import requests
 import getpass
+import re
 import time as time
-from bs4 import BeautifulSoup
-from requests.exceptions import *
 from builtins import input
+
+import requests
+from bs4 import BeautifulSoup
+from requests.exceptions import (Timeout,
+                                 ConnectionError,
+                                 TooManyRedirects,
+                                 RequestException,
+                                 HTTPError)
 
 
 class Session:
-
     email = None
     __pass = None
     __logger = None
