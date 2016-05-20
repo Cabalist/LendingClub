@@ -8,7 +8,7 @@ from logger import TestLogger
 from server import ServerThread
 
 from lendingclub import LendingClub
-from lendingclub.filters import *
+from lendingclub.filters import FilterValidationError, SavedFilter, Filter
 
 
 def matches(regex, subject):
