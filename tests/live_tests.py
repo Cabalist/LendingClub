@@ -8,10 +8,6 @@ from logger import TestLogger
 from builtins import input
 
 
-sys.path.insert(0, '.')
-sys.path.insert(0, '../')
-sys.path.insert(0, '../../')
-
 from lendingclub import LendingClub, Order
 from lendingclub.filters import Filter
 

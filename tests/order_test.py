@@ -6,10 +6,6 @@ import unittest
 from logger import TestLogger
 from server import ServerThread
 
-sys.path.insert(0, '.')
-sys.path.insert(0, '../')
-sys.path.insert(0, '../../')
-
 from lendingclub import LendingClub
 from lendingclub.filters import FilterValidationError
 

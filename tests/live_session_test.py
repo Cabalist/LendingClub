@@ -5,10 +5,6 @@ import unittest
 import getpass
 from logger import TestLogger
 
-sys.path.insert(0, '.')
-sys.path.insert(0, '../')
-sys.path.insert(0, '../../')
-
 from lendingclub import session
 
 

@@ -7,11 +7,8 @@ import subprocess
 from logger import TestLogger
 from server import ServerThread
 
-sys.path.insert(0, '.')
-sys.path.insert(0, '../')
-sys.path.insert(0, '../../')
 
-from LendingClub import session
+from lendingclub import session
 
 
 class TestSession(unittest.TestCase):
