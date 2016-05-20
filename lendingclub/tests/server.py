@@ -95,7 +95,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         self.send_header('Content-Type', content_type)
 
         if type(headers) is dict:
-            for key, value in headers.iteritems():
+            for key, value in headers.items():
                 self.send_header(key, value)
 
         # Debug by echoing the query and data base
@@ -154,11 +154,11 @@ class TestServerHandler(BaseHTTPRequestHandler):
         self.write(json.dumps(error))
 
     def process_post_data(self):
-        content_len = int(self.headers.getheader('content-length'))
+        content_len = int(self.headers.get('content-length'))
         postvars = cgi.parse_qs(self.rfile.read(content_len))
 
         # Flatten values
-        for key, values in postvars.iteritems():
+        for key, values in postvars.items():
             if len(values) == 1:
                 postvars[key] = values[0]
 
@@ -173,7 +173,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         self.query = parse_qs(url.query)
 
         # Flatten query string values
-        for key, values in self.query.iteritems():
+        for key, values in self.query.items():
             if len(values) == 1:
                 self.query[key] = values[0]
 
@@ -355,7 +355,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
             if session_disabled is True:
                 self.write('{"error": "Session disabled"}')
             else:
-                for key, value in data.iteritems():
+                for key, value in data.items():
                     self.add_session(key, value)
                 self.send_headers(302, {'location': '/session'})
 
