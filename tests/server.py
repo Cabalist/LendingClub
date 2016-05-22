@@ -94,7 +94,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         self.send_response(status_code)
         self.send_header('Content-Type', content_type)
 
-        if type(headers) is dict:
+        if isinstance(headers, dict):
             for key, value in headers.items():
                 self.send_header(key, value)
 
@@ -124,7 +124,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         """
         Write to the response stream and send default headers if they haven't been sent yet
         """
-        if self.headers_sent is False:
+        if not self.headers_sent:
             self.send_headers()
         self.wfile.write(output.encode())
 
@@ -355,7 +355,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
 
         # Add the post data to the session
         elif '/session' == path:
-            if session_disabled is True:
+            if session_disabled:
                 self.write('{"error": "Session disabled"}')
             else:
                 for key, value in data.items():

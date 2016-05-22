@@ -656,7 +656,7 @@ class LendingClub(object):
                 break
 
             # Load more
-            if get_all is True and len(notes['loans']) < notes['total']:
+            if get_all and len(notes['loans']) < notes['total']:
                 index += limit
 
             # End
@@ -745,8 +745,8 @@ class LendingClub(object):
         dict
             A dictionary with a list of matching notes on the `loans` key
         """
-        assert grade is None or type(grade) is str, 'grade must be a string'
-        assert portfolio_name is None or type(portfolio_name) is str, 'portfolio_name must be a string'
+        assert grade is None or isinstance(grade, str), 'grade must be a string'
+        assert portfolio_name is None or isinstance(portfolio_name, str), 'portfolio_name must be a string'
 
         index = 0
         found = []
@@ -830,7 +830,7 @@ class LendingClub(object):
         return order
 
 
-class Order:
+class Order(object):
     """
     Used to create an order for one or more loan notes. It's best to create the Order
     instance through the :func:`lendingclub.LendingClub.start_order()` method (see examples below).
@@ -927,14 +927,14 @@ class Order:
             The dollar amount you want to invest in this loan, as a multiple of 25.
         """
         assert amount > 0 and amount % 25 == 0, 'Amount must be a multiple of 25'
-        assert type(amount) in (float, int), 'Amount must be a number'
+        assert isinstance(amount, (float, int)), 'Amount must be a number'
 
-        if type(loan_id) is dict:
+        if isinstance(loan_id, dict):
             loan = loan_id
-            assert 'loan_id' in loan and type(loan['loan_id']) is int, 'loan_id must be a number or dictionary containing a loan_id value'
+            assert 'loan_id' in loan and isinstance(loan['loan_id'], int), 'loan_id must be a number or dictionary containing a loan_id value'
             loan_id = loan['loan_id']
 
-        assert type(loan_id) in [str, unicode, int], 'Loan ID must be an integer number or a string'
+        assert isinstance(loan_id, [str, unicode, int]), 'Loan ID must be an integer number or a string'
         self.loans[loan_id] = amount
 
     def update(self, loan_id, amount):
@@ -984,13 +984,13 @@ class Order:
         assert batch_amount is None or batch_amount % 25 == 0, 'batch_amount must be a multiple of 25'
 
         # Add each loan
-        assert type(loans) is list, 'The loans property must be a list. (not {0})'.format(type(loans))
+        assert isinstance(loans, list), 'The loans property must be a list. (not {0})'.format(type(loans))
         for loan in loans:
             loan_id = loan
             amount = batch_amount
 
             # Extract ID and amount from loan dict
-            if type(loan) is dict:
+            if isinstance(loan, dict):
                 assert 'loan_id' in loan, 'Each loan dict must have a loan_id value'
                 assert batch_amount or 'invest_amount' in loan, 'Could not determine how much to invest in loan {0}'.format(loan['loan_id'])
 
@@ -1089,7 +1089,7 @@ class Order:
         """
 
         # Skip staging...probably not a good idea...you've been warned
-        if self.__already_staged is True and self.__i_know_what_im_doing is True:
+        if self.__already_staged and self.__i_know_what_im_doing:
             self.__log('Not staging the order...I hope you know what you\'re doing...'.format(len(self.loans)))
             return
 
@@ -1107,7 +1107,7 @@ class Order:
         # LendingClub requires you to search for the loans before you can stage them
         f = FilterByLoanID(loan_ids)
         results = self.lc.search(f, limit=len(self.loans))
-        if len(results['loans']) == 0 or results['totalRecords'] != len(self.loans):
+        if results['loans'] or results['totalRecords'] != len(self.loans):
             raise LendingClubError('Could not stage the loans. The number of loans in your batch does not match totalRecords. {0} != {1}'.format(len(self.loans), results['totalRecords']), results)
 
         # Stage each loan
@@ -1166,16 +1166,15 @@ class Order:
             """
             # 'struts.token.name' defines the field name with the token value
 
-            strut_tag = None
             strut_token_name = soup.find('input', {'name': 'struts.token.name'})
             if strut_token_name and strut_token_name['value'].strip():
 
-                # Get form around the strut.token.name element
-                form = soup.form  # assumed
-                for parent in strut_token_name.parents:
-                    if parent and parent.name == 'form':
-                        form = parent
-                        break
+                # # Get form around the strut.token.name element
+                # form = soup.form  # assumed
+                # for parent in strut_token_name.parents:
+                #     if parent and parent.name == 'form':
+                #         form = parent
+                #         break
 
                 # Get strut token value
                 strut_token_name = strut_token_name['value']
@@ -1197,7 +1196,7 @@ class Order:
 
         Parameters
         ----------
-        token : string
+        token : string or dict
             The struts token received from the place order page
 
         Returns
@@ -1208,7 +1207,7 @@ class Order:
         order_id = 0
         response = None
 
-        if not token or token['value'] == '':
+        if not token or not token['value']:
             raise LendingClubError('The token parameter is False, None or unknown.')
 
         # Process order confirmation page

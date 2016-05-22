@@ -69,7 +69,7 @@ class TestLendingClub(unittest.TestCase):
 
     def test_search(self):
         results = self.lc.search()
-        self.assertTrue(results is not False)
+        self.assertTrue(results)
         self.assertTrue('loans' in results)
         self.assertTrue(len(results['loans']) > 0)
 

@@ -97,8 +97,8 @@ class Filter(UserDict):
 
         >>> from lendingclub.filters import Filter
         >>> from pprint import pprint
-        >>> filter = Filter()
-        >>> pprint(filter)
+        >>> my_filter = Filter()
+        >>> pprint(my_filter)
         {'exclude_existing': True,
          'funding_progress': 0,
          'grades': {'A': False,
@@ -181,7 +181,7 @@ class Filter(UserDict):
                 assert isinstance(to_dict[key], type(from_dict[key])), 'Data type for {0} is incorrect: {1}, should be {2}'.format(key, type(from_dict[key]), type(to_dict[key]))
 
                 # Recursively dive into the next dictionary
-                if type(to_dict[key]) is dict:
+                if isinstance(to_dict[key], dict):
                     to_dict[key] = self.__merge_values(from_dict[key], to_dict[key])
 
                 # Replace value
@@ -197,8 +197,8 @@ class Filter(UserDict):
     def __setitem__(self, key, value):
 
         # If setting grades, merge dictionary instead of replace
-        if key == 'grades' and self.__initialized is True:
-            assert type(value) is dict, 'The grades filter must be a dictionary object'
+        if key == 'grades' and self.__initialized:
+            assert isinstance(value,dict), 'The grades filter must be a dictionary object'
             self.__merge_values(value, self['grades'])
             value = self['grades']
 
@@ -212,9 +212,9 @@ class Filter(UserDict):
         If a grade has been set, set All to false
         """
 
-        if 'grades' in self and self['grades']['All'] is True:
+        if 'grades' in self and self['grades']['All']:
             for grade in self['grades']:
-                if grade != 'All' and self['grades'][grade] is True:
+                if grade != 'All' and self['grades'][grade]:
                     self['grades']['All'] = False
                     break
 
@@ -237,7 +237,7 @@ class Filter(UserDict):
         """
 
         # Don't normalize if we're already normalizing or intializing
-        if self.__normalizing is True or self.__initialized is False:
+        if self.__normalizing or not self.__initialized:
             return
 
         self.__normalizing = True
@@ -292,7 +292,7 @@ class Filter(UserDict):
         FilterValidationError
             If the loan does not match the filter criteria
         """
-        assert type(loan) is dict, 'loan parameter must be a dictionary object'
+        assert isinstance(loan, dict), 'loan parameter must be a dictionary object'
 
         # Map the loan value keys to the filter keys
         req = {
@@ -318,17 +318,17 @@ class Filter(UserDict):
 
         # Grade
         grade = loan['loanGrade'][0]  # Extract the letter portion of the loan
-        if 'grades' in self and self['grades']['All'] is not True:
+        if 'grades' in self and not self['grades']['All']:
             if grade not in self['grades']:
                 raise FilterValidationError('Loan grade "{0}" is unknown'.format(grade), loan, 'grade')
-            elif self['grades'][grade] is False:
+            elif not self['grades'][grade]:
                 raise FilterValidationError(loan=loan, criteria='grade')
 
         # Term
         if 'term' in self and self['term'] is not None:
-            if loan['loanLength'] == 36 and self['term']['Year3'] is False:
+            if loan['loanLength'] == 36 and not self['term']['Year3']:
                 raise FilterValidationError(loan=loan, criteria='loan term')
-            elif loan['loanLength'] == 60 and self['term']['Year5'] is False:
+            elif loan['loanLength'] == 60 and not self['term']['Year5']:
                 raise FilterValidationError(loan=loan, criteria='loan term')
 
         # Progress
@@ -339,16 +339,16 @@ class Filter(UserDict):
 
         # Exclude existing
         if 'exclude_existing' in self:
-            if self['exclude_existing'] is True and loan['alreadyInvestedIn'] is True:
+            if self['exclude_existing'] and loan['alreadyInvestedIn']:
                 raise FilterValidationError(loan=loan, criteria='exclude loans you are invested in')
 
         # Loan purpose (either an array or single value)
-        if 'loan_purpose' in self and loan['purpose'] is not False:
+        if 'loan_purpose' in self and loan['purpose']:
             purpose = self['loan_purpose']
-            if type(purpose) is not dict:
+            if isinstance(purpose, dict):
                 purpose = {purpose: True}
 
-            if 'All' not in purpose or purpose['All'] is False:
+            if 'All' not in purpose or not purpose['All']:
                 if loan['purpose'] not in purpose:
                     raise FilterValidationError(loan=loan, criteria='loan purpose')
 
@@ -427,8 +427,8 @@ class SavedFilter(Filter):
         >>> lc = LendingClub(email='test@test.com', password='secret123')
         >>> lc.authenticate()
         True
-        >>> filter = lc.get_saved_filter(23456)    # Get a single saved search filter from the site by ID
-        >>> filter.name
+        >>> my_filter = lc.get_saved_filter(23456)    # Get a single saved search filter from the site by ID
+        >>> my_filter.name
         u'Only A'
     """
     id = None
@@ -529,7 +529,7 @@ class SavedFilter(Filter):
 
                 # Quotes
                 if char == "'" or char == '"':
-                    if inquote is False:  # Starting a quote block
+                    if not inquote:  # Starting a quote block
                         inquote = char
                     elif inquote == char:  # Ending a quote block
                         inquote = False
@@ -558,7 +558,7 @@ class SavedFilter(Filter):
                 json_test = json.loads(json_text)
 
                 # Make sure it looks right
-                assert type(json_test) is list, 'Expecting a list, instead received a {0}'.format(type(json_test))
+                assert isinstance(json_test, list), 'Expecting a list, instead received a {0}'.format(type(json_test))
                 assert 'm_id' in json_test[0], 'Expecting a \'m_id\' property in each filter'
                 assert 'm_value' in json_test[0], 'Expecting a \'m_value\' property in each filter'
 
@@ -619,15 +619,15 @@ class SavedFilter(Filter):
                             continue
 
                         # Loop through multiple values
-                        if type(raw_values) is list:
+                        if isinstance(raw_values, list):
 
                             # A single non string value, is THE value
-                            if len(raw_values) == 1 and type(raw_values[0]['value']) not in [str, unicode]:
+                            if len(raw_values) == 1 and isinstance(raw_values[0]['value'], (str, unicode)):
                                 value = raw_values[0]['value']
 
                             # Create a dict of values: name = True
                             for val in raw_values:
-                                if type(val['value']) in [str, unicode]:
+                                if isinstance(val['value'], (str, unicode)):
                                     value[val['value']] = True
 
                         # A single value
@@ -675,8 +675,8 @@ class FilterByLoanID(Filter):
         >>> lc = LendingClub(email='test@test.com', password='secret123')
         >>> lc.authenticate()
         True
-        >>> filter = FilterByLoanID(1234)  # Search for the loan 1234
-        >>> results = lc.search(filter)
+        >>> my_filter = FilterByLoanID(1234)  # Search for the loan 1234
+        >>> results = lc.search(my_filter)
         >>> len(results['loans'])
         1
 
@@ -687,8 +687,8 @@ class FilterByLoanID(Filter):
         >>> lc = LendingClub(email='test@test.com', password='secret123')
         >>> lc.authenticate()
         True
-        >>> filter = FilterByLoanID(54321, 76432)  # Search for two loans: 54321 and 76432
-        >>> results = lc.search(filter)
+        >>> my_filter = FilterByLoanID(54321, 76432)  # Search for two loans: 54321 and 76432
+        >>> results = lc.search(my_filter)
         >>> len(results['loans'])
         2
     """
@@ -696,7 +696,7 @@ class FilterByLoanID(Filter):
     def __init__(self, loan_id, *args, **kwargs):
         # Convert a list to comma delimited string
         super().__init__(*args, **kwargs)
-        if type(loan_id) is list:
+        if isinstance(loan_id, list):
             loan_id = map(str, loan_id)
             loan_id = ','.join(loan_id)
 

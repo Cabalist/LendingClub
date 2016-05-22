@@ -44,13 +44,13 @@ class LiveTests(unittest.TestCase):
     def test_get_balance(self):
         cash = lc.get_cash_balance()
 
-        self.assertTrue(cash is not False)
+        self.assertTrue(cash)
         self.assertTrue(cash >= 25)
 
     def test_get_investable_balance(self):
         cash = lc.get_investable_balance()
 
-        self.assertTrue(cash is not False)
+        self.assertTrue(cash)
         self.assertTrue(cash >= 25)
         self.assertTrue(cash % 25 == 0)
 
