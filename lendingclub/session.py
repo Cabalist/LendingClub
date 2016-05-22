@@ -51,8 +51,8 @@ from requests.exceptions import (Timeout,
 
 class Session(object):
     email = None
-    __pass = None
-    __logger = None
+    _pass = None
+    _logger = None
 
     last_response = None
 
@@ -66,21 +66,21 @@ class Session(object):
     last_request_time = 0
     """ The timestamp of the last HTTP request """
 
-    __session = None
+    _session = None
 
     def __init__(self, email=None, password=None, logger=None):
         self.email = email
-        self.__pass = password
-        self.__logger = logger
+        self._pass = password
+        self._logger = logger
 
-    def __log(self, message):
+    def _log(self, message):
         """
         Log a debugging message
         """
-        if self.__logger:
-            self.__logger.debug(message)
+        if self._logger:
+            self._logger.debug(message)
 
-    def __continue_session(self):
+    def _continue_session(self):
         """
         Check if the time since the last HTTP request is under the
         session timeout limit. If it's been too long since the last request
@@ -91,7 +91,7 @@ class Session(object):
         timeout_sec = self.session_timeout * 60  # convert minutes to seconds
 
         if diff >= timeout_sec:
-            self.__log('Session timed out, attempting to authenticate')
+            self._log('Session timed out, attempting to authenticate')
             self.authenticate()
 
     def set_logger(self, logger):
@@ -104,7 +104,7 @@ class Session(object):
         logger : `Logger <http://docs.python.org/2/library/logging.html>`_
             The logger to send debug output to.
         """
-        self.__logger = logger
+        self._logger = logger
 
     def build_url(self, path):
         """
@@ -154,9 +154,9 @@ class Session(object):
             self.email = email
 
         if password is None:
-            password = self.__pass
+            password = self._pass
         else:
-            self.__pass = password
+            self._pass = password
 
         # Get them from the user
         if email is None:
@@ -164,13 +164,13 @@ class Session(object):
             self.email = user_email
         if password is None:
             user_password = getpass.getpass()
-            self.__pass = user_password
+            self._pass = user_password
 
-        self.__log('Attempting to authenticate: {0}'.format(self.email))
+        self._log('Attempting to authenticate: {0}'.format(self.email))
 
         # Start session
-        self.__session = requests.Session()
-        self.__session.headers = {
+        self._session = requests.Session()
+        self._session.headers = {
             'Referer': 'https://www.lendingclub.com/',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31'
         }
@@ -181,7 +181,7 @@ class Session(object):
         # Send login request to LC
         payload = {
             'login_email': self.email,
-            'login_password': self.__pass
+            'login_password': self._pass
         }
         response = self.post('/account/login.action', data=payload, redirects=False)
 
@@ -192,15 +192,15 @@ class Session(object):
         endpoint = response_url.split('/')[-1]
 
         # Debugging
-        self.__log('Status code: {0}'.format(response.status_code))
-        self.__log('Redirected to: {0}'.format(response_url))
-        self.__log('Cookies: {0}'.format(str(response.cookies.keys())))
+        self._log('Status code: {0}'.format(response.status_code))
+        self._log('Redirected to: {0}'.format(response_url))
+        self._log('Cookies: {0}'.format(str(response.cookies.keys())))
 
         # Show query and data that the server received
         if 'x-echo-query' in response.headers:
-            self.__log('Query: {0}'.format(response.headers['x-echo-query']))
+            self._log('Query: {0}'.format(response.headers['x-echo-query']))
         if 'x-echo-data' in response.headers:
-            self.__log('Data: {0}'.format(response.headers['x-echo-data']))
+            self._log('Data: {0}'.format(response.headers['x-echo-data']))
 
         # Parse any errors from the HTML
         soup = BeautifulSoup(response.text, "html5lib")
@@ -266,28 +266,28 @@ class Session(object):
         """
 
         # Check session time
-        self.__continue_session()
+        self._continue_session()
 
         try:
             url = self.build_url(path)
             method = method.upper()
 
-            self.__log('{0} request to: {1}'.format(method, url))
+            self._log('{0} request to: {1}'.format(method, url))
 
             if method == 'POST':
-                request = self.__session.post(url, params=query, data=data, allow_redirects=redirects)
+                request = self._session.post(url, params=query, data=data, allow_redirects=redirects)
             elif method == 'GET':
-                request = self.__session.get(url, params=query, data=data, allow_redirects=redirects)
+                request = self._session.get(url, params=query, data=data, allow_redirects=redirects)
             elif method == 'HEAD':
-                request = self.__session.head(url, params=query, data=data, allow_redirects=redirects)
+                request = self._session.head(url, params=query, data=data, allow_redirects=redirects)
             elif method == 'DELETE':
-                request = self.__session.delete(url, params=query, data=data, allow_redirects=redirects)
+                request = self._session.delete(url, params=query, data=data, allow_redirects=redirects)
             else:
                 raise SessionError('{0} is not a supported HTTP method'.format(method))
 
             self.last_response = request
 
-            self.__log('Status code: {0}'.format(request.status_code))
+            self._log('Status code: {0}'.format(request.status_code))
 
             # Update session time
             self.last_request_time = time.time()

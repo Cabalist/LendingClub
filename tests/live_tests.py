@@ -20,16 +20,16 @@ class LiveTests(unittest.TestCase):
         # Clear any existing orders
         lc.session.clear_session_order()
 
-        # Override Order.__place_order so that no orders can be made
-        Order._Order__place_order = self.place_order_override
+        # Override _place_order so that no orders can be made
+        Order._place_order = self.place_order_override
 
         # Make sure that the override worked
         o = Order(lc)
-        self.assertEqual(o._Order__place_order('token'), 12345)
+        self.assertEqual(o._place_order('token'), 12345)
 
     def place_order_override(self, token):
         """
-        This overrides the Order.__place_order method so that no
+        This overrides the Order._place_order method so that no
         actual order is ever made
         """
         assert token, 'The token is empty or does not exist'

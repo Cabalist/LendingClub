@@ -127,8 +127,8 @@ class Filter(dict):
     """
 
     tmpl_file = False
-    __initialized = False
-    __normalizing = False
+    _initialized = False
+    _normalizing = False
 
     def __init__(self, filters=None, *args, **kwargs):
         """
@@ -156,17 +156,17 @@ class Filter(dict):
 
         # Merge in filter values
         if filters is not None:
-            self.__merge_values(filters, self)
+            self._merge_values(filters, self)
 
         # Set the template file path
         this_path = os.path.dirname(os.path.realpath(__file__))
         self.tmpl_file = os.path.join(this_path, 'filter.handlebars')
 
-        self.__initialized = True
+        self._initialized = True
 
-        self.__normalize()
+        self._normalize()
 
-    def __merge_values(self, from_dict, to_dict):
+    def _merge_values(self, from_dict, to_dict):
         """
         Merge dictionary objects recursively, by only updating keys existing in to_dict
         """
@@ -180,7 +180,7 @@ class Filter(dict):
 
                 # Recursively dive into the next dictionary
                 if isinstance(to_dict[key], dict):
-                    to_dict[key] = self.__merge_values(from_dict[key], to_dict[key])
+                    to_dict[key] = self._merge_values(from_dict[key], to_dict[key])
 
                 # Replace value
                 else:
@@ -189,22 +189,22 @@ class Filter(dict):
         return to_dict
 
     def __getitem__(self, key):
-        self.__normalize()
+        self._normalize()
         return super(Filter, self).__getitem__(key)
 
     def __setitem__(self, key, value):
 
         # If setting grades, merge dictionary instead of replace
-        if key == 'grades' and self.__initialized:
+        if key == 'grades' and self._initialized:
             assert isinstance(value,dict), 'The grades filter must be a dictionary object'
-            self.__merge_values(value, self['grades'])
+            self._merge_values(value, self['grades'])
             value = self['grades']
 
         # Set value and normalize
         super(Filter, self).__setitem__(key, value)
-        self.__normalize()
+        self._normalize()
 
-    def __normalize_grades(self):
+    def _normalize_grades(self):
         """
         Adjust the grades list.
         If a grade has been set, set All to false
@@ -216,7 +216,7 @@ class Filter(dict):
                     self['grades']['All'] = False
                     break
 
-    def __normalize_progress(self):
+    def _normalize_progress(self):
         """
         Adjust the funding progress filter to be a factor of 10
         """
@@ -227,7 +227,7 @@ class Filter(dict):
 
             self['funding_progress'] = progress
 
-    def __normalize(self):
+    def _normalize(self):
         """
         Adjusts the values of the filters to be correct.
         For example, if you set grade 'B' to True, then 'All'
@@ -235,13 +235,13 @@ class Filter(dict):
         """
 
         # Don't normalize if we're already normalizing or intializing
-        if self.__normalizing or not self.__initialized:
+        if self._normalizing or not self._initialized:
             return
 
-        self.__normalizing = True
-        self.__normalize_grades()
-        self.__normalize_progress()
-        self.__normalizing = False
+        self._normalizing = True
+        self._normalize_grades()
+        self._normalize_progress()
+        self._normalizing = False
 
     def validate(self, results):
         """
@@ -356,7 +356,7 @@ class Filter(dict):
         """"
         Returns the JSON string that LendingClub expects for it's search
         """
-        self.__normalize()
+        self._normalize()
 
         # Get the template
         tmpl_source = unicode(open(self.tmpl_file).read())
@@ -565,7 +565,7 @@ class SavedFilter(Filter):
                 raise SavedFilterError('Could not parse filter from the JSON response: {0}'.format(str(e)))
 
             self.json_text = json_text
-            self.__analyze()
+            self._analyze()
 
         else:
             raise SavedFilterError('A saved filter could not be found for ID {0}'.format(self.id), response)
@@ -579,7 +579,7 @@ class SavedFilter(Filter):
     def __setitem__(self, key, value):
         raise SavedFilterError('A saved filter cannot be modified')
 
-    def __analyze(self):
+    def _analyze(self):
         """
         Analyze the filter JSON and attempt to parse out the individual filters.
         """
@@ -643,7 +643,7 @@ class SavedFilter(Filter):
 
         return filter_values
 
-    def __normalize(self):
+    def _normalize(self):
         pass
 
     def search_string(self):
@@ -702,7 +702,7 @@ class FilterByLoanID(Filter):
         this_path = os.path.dirname(os.path.realpath(__file__))
         self.tmpl_file = os.path.join(this_path, 'filter.handlebars')
 
-    def __normalize(self):
+    def _normalize(self):
         pass
 
 

@@ -79,7 +79,7 @@ class LendingClub(object):
         True
     """
 
-    __logger = None
+    _logger = None
     session = None
     order = None
 
@@ -90,12 +90,12 @@ class LendingClub(object):
         if logger is not None:
             self.set_logger(logger)
 
-    def __log(self, message):
+    def _log(self, message):
         """
         Log a debugging message
         """
-        if self.__logger:
-            self.__logger.debug(message)
+        if self._logger:
+            self._logger.debug(message)
 
     def set_logger(self, logger):
         """
@@ -106,8 +106,8 @@ class LendingClub(object):
         logger : `Logger <http://docs.python.org/2/library/logging.html>`_
             A python logger used to get debugging output from this module.
         """
-        self.__logger = logger
-        self.session.set_logger(self.__logger)
+        self._logger = logger
+        self.session.set_logger(self._logger)
 
     @staticmethod
     def version():
@@ -176,7 +176,7 @@ class LendingClub(object):
             json_response = response.json()
 
             if self.session.json_success(json_response):
-                self.__log('Cash available: {0}'.format(json_response['cashBalance']))
+                self._log('Cash available: {0}'.format(json_response['cashBalance']))
                 cash_value = json_response['cashBalance']
 
                 # Convert currency to float value
@@ -187,13 +187,13 @@ class LendingClub(object):
                     cash_str = cash_str.replace(',', '')
                     cash = Decimal(cash_str)
             else:
-                self.__log('Could not get cash balance: {0}'.format(response.text))
+                self._log('Could not get cash balance: {0}'.format(response.text))
 
         except Exception as e:
             if response:
-                self.__log('Could not get the cash balance on the account: Error: {0}\nJSON: {1}'.format(e, response.text))
+                self._log('Could not get the cash balance on the account: Error: {0}\nJSON: {1}'.format(e, response.text))
             else:
-                self.__log('Could not get the cash balance on the account: Error: {0}\n No response from server.'.format(e, response.text))
+                self._log('Could not get the cash balance on the account: Error: {0}\n No response from server.'.format(e, response.text))
             raise e
 
         return cash
@@ -324,7 +324,7 @@ class LendingClub(object):
 
             # Assigned to the correct portfolio
             else:
-                self.__log('Added order to portfolio "{0}"'.format(portfolio_name))
+                self._log('Added order to portfolio "{0}"'.format(portfolio_name))
 
             return True
 
@@ -500,7 +500,7 @@ class LendingClub(object):
             'max_per_note': max_per_note,
             'filter': filter_str
         }
-        self.__log('POST VALUES -- amount: {0}, max_per_note: {1}, filter: ...'.format(cash, max_per_note))
+        self._log('POST VALUES -- amount: {0}, max_per_note: {1}, filter: ...'.format(cash, max_per_note))
         response = self.session.post('/portfolio/lendingMatchOptionsV2.action', data=payload)
         json_response = response.json()
 
@@ -510,7 +510,7 @@ class LendingClub(object):
 
             # Nothing found
             if not isinstance(options, list) or json_response['numberTicks'] == 0:
-                self.__log('No lending portfolios were returned with your search')
+                self._log('No lending portfolios were returned with your search')
                 return False
 
             # Choose an investment option based on the user's min/max values
@@ -541,7 +541,7 @@ class LendingClub(object):
 
             # Nothing matched
             if match_option is None:
-                self.__log('No portfolios matched your percentage requirements')
+                self._log('No portfolios matched your percentage requirements')
                 return False
 
             # Mark this portfolio for investing (in order to get a list of all notes)
@@ -573,7 +573,7 @@ class LendingClub(object):
                         raise LendingClubError('ERROR: LendingClub tried to invest ${0} in a loan note. Your max per note is set to ${1}. Portfolio investment canceled.'.format(frac['invest_amount'], max_per_note))
 
             if not fractions:
-                self.__log('The selected portfolio didn\'t have any loans')
+                self._log('The selected portfolio didn\'t have any loans')
                 return False
             match_option['loan_fractions'] = fractions
 
@@ -591,8 +591,8 @@ class LendingClub(object):
                 order = self.start_order()
 
                 # This should probably only be ever done here...ever.
-                order._Order__already_staged = True
-                order._Order__i_know_what_im_doing = True
+                order._already_staged = True
+                order._i_know_what_im_doing = True
 
                 order.add_batch(match_option['loan_fractions'])
                 order_id = order.execute()
@@ -896,8 +896,8 @@ class Order(object):
     # These two attributes should [almost] never be used. It assumes that all the loans are already staged
     # and skips clearing and staging and goes straight to investing everything which is staged, either
     # here or on LC.com
-    __already_staged = False
-    __i_know_what_im_doing = False
+    _already_staged = False
+    _i_know_what_im_doing = False
 
     def __init__(self, lc):
         """
@@ -907,11 +907,11 @@ class Order(object):
         self.loans = {}
         self.order_id = 0
 
-        self.__already_staged = False
-        self.__i_know_what_im_doing = False
+        self._already_staged = False
+        self._i_know_what_im_doing = False
 
-    def __log(self, msg):
-        self.lc._LendingClub__log(msg)
+    def _log(self, msg):
+        self.lc._log(msg)
 
     def add(self, loan_id, amount):
         """
@@ -1044,11 +1044,11 @@ class Order(object):
         assert len(self.loans) > 0, 'There aren\'t any loans in your order'
 
         # Place the order
-        self.__stage_order()
-        token = self.__get_strut_token()
-        self.order_id = self.__place_order(token)
+        self._stage_order()
+        token = self._get_strut_token()
+        self.order_id = self._place_order(token)
 
-        self.__log('Order #{0} was successfully submitted'.format(self.order_id))
+        self._log('Order #{0} was successfully submitted'.format(self.order_id))
 
         # Assign to portfolio
         if portfolio_name:
@@ -1083,17 +1083,17 @@ class Order(object):
 
         return self.lc.assign_to_portfolio(portfolio_name, loan_ids, order_ids)
 
-    def __stage_order(self):
+    def _stage_order(self):
         """
         Add all the loans to the LC order session
         """
 
         # Skip staging...probably not a good idea...you've been warned
-        if self.__already_staged and self.__i_know_what_im_doing:
-            self.__log('Not staging the order...I hope you know what you\'re doing...'.format(len(self.loans)))
+        if self._already_staged and self._i_know_what_im_doing:
+            self._log('Not staging the order...I hope you know what you\'re doing...'.format(len(self.loans)))
             return
 
-        self.__log('Staging order for {0} loan notes...'.format(len(self.loans)))
+        self._log('Staging order for {0} loan notes...'.format(len(self.loans)))
 
         # Create a fresh order session
         self.lc.session.clear_session_order()
@@ -1102,7 +1102,7 @@ class Order(object):
         # Stage all the loans to the order
         #
         loan_ids = self.loans.keys()
-        self.__log('Staging loans {0}'.format(loan_ids))
+        self._log('Staging loans {0}'.format(loan_ids))
 
         # LendingClub requires you to search for the loans before you can stage them
         f = FilterByLoanID(loan_ids)
@@ -1135,13 +1135,13 @@ class Order(object):
         json_response = response.json()
 
         if self.lc.session.json_success(json_response):
-            self.__log(json_response['message'])
+            self._log(json_response['message'])
             return True
         else:
-            self.__log('Could not add loans to the order: {0}'.format(response.text))
+            self._log('Could not add loans to the order: {0}'.format(response.text))
             raise LendingClubError('Could not add loans to the order', response.text)
 
-    def __get_strut_token(self):
+    def _get_strut_token(self):
         """
         Move the staged loan notes to the order stage and get the struts token
         from the place order HTML.
@@ -1183,14 +1183,14 @@ class Order(object):
                     return {'name': strut_token_name, 'value': strut_tag['value'].strip()}
 
             # No strut token found
-            self.__log('No struts token! HTML: {0}'.format(response.text))
+            self._log('No struts token! HTML: {0}'.format(response.text))
             raise LendingClubError('No struts token. Please report this error.', response)
 
         except Exception as e:
-            self.__log('Could not get struts token. Error message: {0}'.format(str(e)))
+            self._log('Could not get struts token. Error message: {0}'.format(str(e)))
             raise LendingClubError('Could not get struts token. Error message: {0}'.format(str(e)))
 
-    def __place_order(self, token):
+    def _place_order(self, token):
         """
         Use the struts token to place the order.
 
@@ -1230,7 +1230,7 @@ class Order(object):
 
             # Did not find an ID
             if order_id == 0:
-                self.__log('An investment order was submitted, but a confirmation ID could not be determined')
+                self._log('An investment order was submitted, but a confirmation ID could not be determined')
                 raise LendingClubError('No order ID was found when placing the order.', response)
             else:
                 return order_id
