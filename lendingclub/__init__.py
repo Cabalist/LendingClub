@@ -233,8 +233,7 @@ class LendingClub(object):
             folios = json_response['results']
 
             if names_only is True:
-                for i, folio in enumerate(folios):
-                    folios[i] = folio['portfolioName']
+                folios = [folio['portfolioName'] for folio in folios]
 
         return folios
 
