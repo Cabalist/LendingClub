@@ -76,12 +76,10 @@ from pybars import Compiler
 PY3 = sys.version_info > (3,)
 if PY3:
     unicode = str
-    from collections import UserDict
-else:
-    from UserDict import UserDict
 
 
-class Filter(UserDict):
+
+class Filter(dict):
     """
     The default search filter that let's you refine your search based on a
     dictionary of search facets. Not all search options are supported yet.
@@ -138,7 +136,7 @@ class Filter(UserDict):
         """
 
         # Set filter values
-        super().__init__(*args, **kwargs)
+        super(Filter, self).__init__(*args, **kwargs)
         self['term'] = {
             'Year3': True,
             'Year5': True
@@ -466,7 +464,7 @@ class SavedFilter(Filter):
         return filters
 
     def __init__(self, lc, filter_id, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(SavedFilter, self).__init__(*args, **kwargs)
         self.id = filter_id
         self.lc = lc
         self.load()
@@ -695,7 +693,7 @@ class FilterByLoanID(Filter):
 
     def __init__(self, loan_id, *args, **kwargs):
         # Convert a list to comma delimited string
-        super().__init__(*args, **kwargs)
+        super(FilterByLoanID, self).__init__(*args, **kwargs)
         if isinstance(loan_id, list):
             loan_id = map(str, loan_id)
             loan_id = ','.join(loan_id)
