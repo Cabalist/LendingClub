@@ -74,10 +74,13 @@ import sys
 PY3 = sys.version_info > (3,)
 if PY3:
     unicode = str
+    from collections import UserDict
+else:
+    from UserDict import UserDict
 
 
 
-class Filter(dict):
+class Filter(UserDict):
     """
     The default search filter that let's you refine your search based on a
     dictionary of search facets. Not all search options are supported yet.
@@ -128,12 +131,13 @@ class Filter(dict):
     __initialized = False
     __normalizing = False
 
-    def __init__(self, filters=None):
+    def __init__(self, filters=None, *args, **kwargs):
         """
         Set the default search filter values
         """
 
         # Set filter values
+        super().__init__(*args, **kwargs)
         self['term'] = {
             'Year3': True,
             'Year5': True
@@ -160,6 +164,7 @@ class Filter(dict):
         self.tmpl_file = os.path.join(this_path, 'filter.handlebars')
 
         self.__initialized = True
+
         self.__normalize()
 
     def __merge_values(self, from_dict, to_dict):
@@ -186,18 +191,18 @@ class Filter(dict):
 
     def __getitem__(self, key):
         self.__normalize()
-        return dict.__getitem__(self, key)
+        return super(Filter, self).__getitem__(key)
 
     def __setitem__(self, key, value):
 
         # If setting grades, merge dictionary instead of replace
         if key == 'grades' and self.__initialized is True:
             assert type(value) is dict, 'The grades filter must be a dictionary object'
-            self.__merge_values(value, dict.__getitem__(self, 'grades'))
+            self.__merge_values(value, self['grades'])
             value = self['grades']
 
         # Set value and normalize
-        dict.__setitem__(self, key, value)
+        super(Filter, self).__setitem__(key, value)
         self.__normalize()
 
     def __normalize_grades(self):
@@ -216,7 +221,6 @@ class Filter(dict):
         """
         Adjust the funding progress filter to be a factor of 10
         """
-
         progress = self['funding_progress']
         if progress % 10 != 0:
             progress = round(float(progress) / 10)
@@ -307,7 +311,7 @@ class Filter(dict):
 
         # Loan ID
         if 'loan_id' in self:
-            loan_ids = str(self['loan_id']).split(',')
+            loan_ids = map(str, self['loan_id'])
             if str(loan['loanGUID']) not in loan_ids:
                 raise FilterValidationError('Did not meet filter criteria for loan ID. {0} does not match {1}'.format(loan['loanGUID'], self['loan_id']), loan=loan, criteria='loan ID')
 
@@ -460,7 +464,8 @@ class SavedFilter(Filter):
 
         return filters
 
-    def __init__(self, lc, filter_id):
+    def __init__(self, lc, filter_id, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.id = filter_id
         self.lc = lc
         self.load()
@@ -635,7 +640,7 @@ class SavedFilter(Filter):
 
                     # Add filter value
                     filter_values[name] = value
-                    dict.__setitem__(self, name, value)
+                    self.__setitem__(name, value)
 
         return filter_values
 
@@ -687,9 +692,10 @@ class FilterByLoanID(Filter):
         2
     """
 
-    def __init__(self, loan_id):
+    def __init__(self, loan_id, *args, **kwargs):
 
         # Convert a list to comma delimited string
+        super().__init__(*args, **kwargs)
         if type(loan_id) is list:
             loan_id = map(str, loan_id)
             loan_id = ','.join(loan_id)
