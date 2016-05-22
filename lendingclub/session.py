@@ -44,7 +44,7 @@ from requests.exceptions import (Timeout,
                                  HTTPError)
 
 
-class Session:
+class Session(object):
     email = None
     __pass = None
     __logger = None
@@ -155,11 +155,11 @@ class Session:
 
         # Get them from the user
         if email is None:
-            email = input('Email:')
-            self.email = email
+            user_email = input('Email:')
+            self.email = user_email
         if password is None:
-            password = getpass.getpass()
-            self.__pass = password
+            user_password = getpass.getpass()
+            self.__pass = user_password
 
         self.__log('Attempting to authenticate: {0}'.format(self.email))
 
@@ -175,8 +175,8 @@ class Session:
 
         # Send login request to LC
         payload = {
-            'login_email': email,
-            'login_password': password
+            'login_email': self.email,
+            'login_password': self.__pass
         }
         response = self.post('/account/login.action', data=payload, redirects=False)
 

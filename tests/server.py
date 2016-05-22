@@ -32,7 +32,6 @@ PY3 = sys.version_info > (3,)
 
 import os
 import json
-import cgi
 from threading import Thread
 
 if PY3:
@@ -125,7 +124,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         """
         if self.headers_sent is False:
             self.send_headers()
-        self.wfile.write(output)
+        self.wfile.write(output.encode())
 
     def add_session(self, key, value):
         """
@@ -155,14 +154,15 @@ class TestServerHandler(BaseHTTPRequestHandler):
 
     def process_post_data(self):
         content_len = int(self.headers.get('content-length'))
-        postvars = cgi.parse_qs(self.rfile.read(content_len))
-
+        postvars = parse_qs(self.rfile.read(content_len))
+        data = {}
         # Flatten values
         for key, values in postvars.items():
             if len(values) == 1:
-                postvars[key] = values[0]
-
-        self.data = postvars
+                data[key.decode()] = values[0].decode()
+            else:
+                data[key.decode()] = values
+        self.data = data
 
     def process_url(self):
         """
