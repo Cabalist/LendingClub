@@ -31,6 +31,7 @@ The stand-alone python module for interacting with your Lending Club account.
 import os
 import re
 import sys
+from decimal import Decimal
 
 from bs4 import BeautifulSoup
 
@@ -118,8 +119,8 @@ class LendingClub(object):
             The version number string
         """
         this_path = os.path.dirname(os.path.realpath(__file__))
-        version_file = os.path.join(this_path, 'VERSION')
-        return open(version_file).read().strip()
+        with open(os.path.join(this_path, 'VERSION')) as version_file:
+            return version_file.read().strip()
 
     def authenticate(self, email=None, password=None):
         """
@@ -167,7 +168,8 @@ class LendingClub(object):
         float
             The cash balance in your account.
         """
-        cash = False
+        cash = Decimal(0)
+        response = None
         try:
             response = self.session.get('/browse/cashBalanceAj.action')
             json_response = response.json()
@@ -182,12 +184,15 @@ class LendingClub(object):
                 if cash_match:
                     cash_str = cash_match.group(1)
                     cash_str = cash_str.replace(',', '')
-                    cash = float(cash_str)
+                    cash = Decimal(cash_str)
             else:
                 self.__log('Could not get cash balance: {0}'.format(response.text))
 
         except Exception as e:
-            self.__log('Could not get the cash balance on the account: Error: {0}\nJSON: {1}'.format(str(e), response.text))
+            if response:
+                self.__log('Could not get the cash balance on the account: Error: {0}\nJSON: {1}'.format(e, response.text))
+            else:
+                self.__log('Could not get the cash balance on the account: Error: {0}\n No response from server.'.format(e, response.text))
             raise e
 
         return cash
