@@ -285,11 +285,9 @@ class LendingClub(object):
         boolean
             True on success
         """
-        response = None
-
-        assert type(loan_id) == type(order_id), "Both loan_id and order_id need to be the same type"
-        assert type(loan_id) in (int, list), "loan_id and order_id can only be int or list types"
-        assert type(loan_id) is int or (type(loan_id) is list and len(loan_id) == len(order_id)), "If order_id and loan_id are lists, they both need to be the same length"
+        assert isinstance(loan_id, type(order_id)), "Both loan_id and order_id need to be the same type"
+        assert isinstance(loan_id, (int, list)), "loan_id and order_id can only be int or list types"
+        assert isinstance(loan_id, int) or (isinstance(loan_id, list) and len(loan_id) == len(order_id)), "If order_id and loan_id are lists, they both need to be the same length"
 
         # Data
         post = {
@@ -307,6 +305,7 @@ class LendingClub(object):
         for folio in existing:
             if folio['portfolioName'] == portfolio_name:
                 query['method'] = 'addToLCPortfolio'
+                break
 
         # Send
         response = self.session.post('/data/portfolioManagement', query=query, data=post)
@@ -314,7 +313,7 @@ class LendingClub(object):
 
         # Failed
         if not self.session.json_success(json_response):
-            raise LendingClubError('Could not assign order to portfolio \'{0}\''.format(portfolio_name), response)
+            raise LendingClubError('Could not assign order to portfolio "{0}"'.format(portfolio_name), response)
 
         # Success
         else:
@@ -329,7 +328,6 @@ class LendingClub(object):
 
             return True
 
-        return False
 
     def search(self, filters=None, start_index=0, limit=100):
         """
