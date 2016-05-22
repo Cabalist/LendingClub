@@ -343,7 +343,7 @@ class Filter(dict):
         # Loan purpose (either an array or single value)
         if 'loan_purpose' in self and loan['purpose']:
             purpose = self['loan_purpose']
-            if isinstance(purpose, dict):
+            if not isinstance(purpose, dict):
                 purpose = {purpose: True}
 
             if 'All' not in purpose or not purpose['All']:
@@ -464,7 +464,7 @@ class SavedFilter(Filter):
         return filters
 
     def __init__(self, lc, filter_id, *args, **kwargs):
-        # super(SavedFilter, self).__init__(*args, **kwargs)
+        super(SavedFilter, self).__init__(*args, **kwargs)
         self.id = filter_id
         self.lc = lc
         self.load()
@@ -576,8 +576,9 @@ class SavedFilter(Filter):
     def __repr__(self):
         return self.__str__()
 
-    def __setitem__(self, key, value):
-        raise SavedFilterError('A saved filter cannot be modified')
+    # def __setitem__(self, key, value):
+    #     pass
+        # raise SavedFilterError('A saved filter cannot be modified')
 
     def _analyze(self):
         """
@@ -620,7 +621,7 @@ class SavedFilter(Filter):
                         if isinstance(raw_values, list):
 
                             # A single non string value, is THE value
-                            if len(raw_values) == 1 and isinstance(raw_values[0]['value'], (str, unicode)):
+                            if len(raw_values) == 1 and not isinstance(raw_values[0]['value'], (str, unicode)):
                                 value = raw_values[0]['value']
 
                             # Create a dict of values: name = True

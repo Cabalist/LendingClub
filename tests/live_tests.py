@@ -2,9 +2,16 @@
 # coding=utf-8
 
 import getpass
+import sys
 import unittest
-from builtins import input
 from random import choice
+
+PY3 = sys.version_info > (3,)
+
+if PY3:
+    from builtins import input
+else:
+    input = raw_input
 
 from logger import TestLogger
 
