@@ -28,6 +28,7 @@ THE SOFTWARE.
 The stand-alone python module for interacting with your Lending Club account.
 """
 
+from __future__ import division
 import os
 import re
 import sys
@@ -165,7 +166,7 @@ class LendingClub(object):
 
         Returns
         -------
-        float
+        Decimal
             The cash balance in your account.
         """
         cash = Decimal(0)
@@ -204,13 +205,10 @@ class LendingClub(object):
 
         Returns
         -------
-        int
+        Decimal
             The amount of cash you can invest
         """
-        cash = int(self.get_cash_balance())
-        while cash % 25 != 0:
-            cash -= 1
-        return cash
+        return (self.get_cash_balance() // 25) * 25
 
     def get_portfolio_list(self, names_only=False):
         """
