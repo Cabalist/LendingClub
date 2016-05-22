@@ -232,7 +232,7 @@ class LendingClub(object):
         if self.session.json_success(json_response):
             folios = json_response['results']
 
-            if names_only is True:
+            if names_only:
                 folios = [folio['portfolioName'] for folio in folios]
 
         return folios
@@ -509,7 +509,7 @@ class LendingClub(object):
             options = json_response['lmOptions']
 
             # Nothing found
-            if type(options) is not list or json_response['numberTicks'] == 0:
+            if not isinstance(options, list) or json_response['numberTicks'] == 0:
                 self.__log('No lending portfolios were returned with your search')
                 return False
 
@@ -520,6 +520,7 @@ class LendingClub(object):
             for option in options:
 
                 # A perfect match
+                # Take it and move on
                 if option['percentage'] == max_percent:
                     match_option = option
                     match_index = i
@@ -530,9 +531,11 @@ class LendingClub(object):
                     break
 
                 # Higher than the minimum percent and the current matched option
-                elif option['percentage'] >= min_percent and (match_option is None or match_option['percentage'] < option['percentage']):
-                    match_option = option
-                    match_index = i
+                # Take it and keep looking
+                elif option['percentage'] >= min_percent:
+                    if match_option is None or match_option['percentage'] < option['percentage']:
+                        match_option = option
+                        match_index = i
 
                 i += 1
 
@@ -569,7 +572,7 @@ class LendingClub(object):
                     if frac['invest_amount'] > max_per_note:
                         raise LendingClubError('ERROR: LendingClub tried to invest ${0} in a loan note. Your max per note is set to ${1}. Portfolio investment canceled.'.format(frac['invest_amount'], max_per_note))
 
-            if len(fractions) == 0:
+            if fractions:
                 self.__log('The selected portfolio didn\'t have any loans')
                 return False
             match_option['loan_fractions'] = fractions
@@ -579,12 +582,12 @@ class LendingClub(object):
                 filters.validate(fractions)
 
             # Not investing -- reset portfolio search session and return
-            if automatically_invest is not True:
-                if do_not_clear_staging is not True:
+            if not automatically_invest:
+                if not do_not_clear_staging:
                     self.session.clear_session_order()
 
             # Invest in this porfolio
-            elif automatically_invest is True:  # just to be sure
+            elif automatically_invest:  # just to be sure
                 order = self.start_order()
 
                 # This should probably only be ever done here...ever.
@@ -599,7 +602,6 @@ class LendingClub(object):
         else:
             raise LendingClubError('Could not find any portfolio options that match your filters', response)
 
-        return False
 
     def my_notes(self, start_index=0, limit=100, get_all=False, sort_by='loanId', sort_dir='asc'):
         """
