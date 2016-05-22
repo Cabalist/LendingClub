@@ -353,6 +353,8 @@ class LendingClub(object):
         """
         assert filters is None or isinstance(filters, Filter), 'filter is not a lendingclub.filters.Filter'
 
+        results = {}
+
         # Set filters
         if filters:
             filter_string = filters.search_string()
@@ -380,9 +382,8 @@ class LendingClub(object):
             if filters is not None:
                 filters.validate(results['loans'])
 
-            return results
+        return results
 
-        return False
 
     def build_portfolio(self, cash, max_per_note=25, min_percent=0, max_percent=20, filters=None, automatically_invest=False, do_not_clear_staging=False):
         """
