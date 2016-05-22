@@ -27,7 +27,7 @@ class TestSession(unittest.TestCase):
         """ test_valid_login
         Test login with valid credentials
         """
-        self.assertTrue(self.session.authenticate('test@test.com', 'supersecret'))
+        self.assertTrue(self.session.authenticate('test@test.com', 'supersecret12'))
 
     def test_invalid_password(self):
         """ test_invalid_password

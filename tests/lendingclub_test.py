@@ -20,7 +20,7 @@ class TestLendingClub(unittest.TestCase):
         self.lc.session.base_url = 'http://127.0.0.1:8000/'
         self.lc.session.set_logger(None)
 
-        self.lc.authenticate('test@test.com', 'supersecret')
+        self.lc.authenticate('test@test.com', 'supersecret12')
 
         # Make sure session is enabled and clear
         self.lc.session.post('/session/enabled')
