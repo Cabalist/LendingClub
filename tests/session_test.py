@@ -1,12 +1,10 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-import sys
-import os
 import unittest
-import subprocess
+
 from logger import TestLogger
 from server import ServerThread
-
 
 from lendingclub import session
 

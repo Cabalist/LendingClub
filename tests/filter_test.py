@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-import re
-import sys
 import json as pyjson
+import re
 import unittest
+
 from logger import TestLogger
 from server import ServerThread
 

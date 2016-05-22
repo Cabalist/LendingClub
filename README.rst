@@ -16,7 +16,7 @@ The following Python libraries are required (ignore if installing with pip):
 * `requests <http://docs.python-requests.org/en/latest/>`_
 * `beautifulsoup4 <http://www.crummy.com/software/BeautifulSoup/>`_
 * `html5lib <https://github.com/html5lib/html5lib-python>`_
-* `pybars <https://github.com/wbond/pybars>`_
+* `pybars3 <https://github.com/wbond/pybars3>`_
 
 
 Install with PIP
@@ -27,7 +27,7 @@ The easiest way to install is with `pip <http://www.pip-installer.org/en/latest/
     sudo pip install lendingclub
 
 Install Manually
------------------
+----------------
 
 First make sure the dependencies are instaled and then run::
 
@@ -69,7 +69,7 @@ Searching for grade B loans and investing $25 in the first one you find::
     True
 
 Invest in a Portfolio of Loans
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Here we want to invest $400 in a portfolio with only B, C, D and E grade notes with an average overall return between 17% - 19%. This similar to finding a portfolio in the 'Invest' section on lendingclub.com::
 
     >>> from lendingclub import LendingClub

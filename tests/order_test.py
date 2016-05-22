@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-import json
-import sys
 import unittest
+
 from logger import TestLogger
 from server import ServerThread
 
@@ -159,7 +159,7 @@ class TestBatchOrder(unittest.TestCase):
         """ test_add_batch_object
         Pulling loans from the 'loan_fractions' value is no longer supported
         """
-        loanDict = {
+        loandict = {
             'loan_fractions': [
                 {
                     'loan_id': 123,
@@ -172,7 +172,7 @@ class TestBatchOrder(unittest.TestCase):
         }
         self.assertRaises(
             AssertionError,
-            lambda: self.order.add_batch(loanDict)
+            lambda: self.order.add_batch(loandict)
         )
 
     def test_execute(self):

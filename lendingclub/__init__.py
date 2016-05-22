@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-
-"""
-The stand-alone python module for interacting with your Lending Club account.
-"""
+# coding=utf-8
 
 """
 The MIT License (MIT)
@@ -26,22 +23,26 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+
+The stand-alone python module for interacting with your Lending Club account.
 """
 
-import re
 import os
-from pprint import pprint
+import re
+import sys
+
 from bs4 import BeautifulSoup
+
 from lendingclub.filters import Filter, FilterByLoanID, SavedFilter
 from lendingclub.session import Session
 
-import sys
 PY3 = sys.version_info > (3,)
 if PY3:
     unicode = str
 
 
-class LendingClub:
+class LendingClub(object):
     """
     The main entry point for interacting with Lending Club.
 
@@ -106,7 +107,8 @@ class LendingClub:
         self.__logger = logger
         self.session.set_logger(self.__logger)
 
-    def version(self):
+    @staticmethod
+    def version():
         """
         Return the version number of the Lending Club Investor tool
 
@@ -746,7 +748,7 @@ class LendingClub:
         index = 0
         found = []
         sort_by = 'orderId' if order_id is not None else 'loanId'
-        group_id = order_id if order_id is not None else loan_id   # first match by order, then by loan
+        group_id = order_id if order_id is not None else loan_id  # first match by order, then by loan
 
         # Normalize grade
         if grade is not None:
@@ -1074,7 +1076,7 @@ class Order:
         loan_ids = self.loans.keys()
 
         # Make a list of 1 order ID per loan
-        order_ids = [self.order_id]*len(loan_ids)
+        order_ids = [self.order_id] * len(loan_ids)
 
         return self.lc.assign_to_portfolio(portfolio_name, loan_ids, order_ids)
 
@@ -1133,7 +1135,7 @@ class Order:
             self.__log(json_response['message'])
             return True
         else:
-            raise self.__log('Could not add loans to the order: {0}'.format(response.text))
+            self.__log('Could not add loans to the order: {0}'.format(response.text))
             raise LendingClubError('Could not add loans to the order', response.text)
 
     def __get_strut_token(self):
@@ -1154,7 +1156,6 @@ class Order:
             response = self.lc.session.get('/portfolio/placeOrder.action')
             soup = BeautifulSoup(response.text, "html5lib")
 
-
             # Example HTML with the stuts token:
             """
             <input type="hidden" name="struts.token.name" value="token" />
@@ -1167,7 +1168,7 @@ class Order:
             if strut_token_name and strut_token_name['value'].strip():
 
                 # Get form around the strut.token.name element
-                form = soup.form # assumed
+                form = soup.form  # assumed
                 for parent in strut_token_name.parents:
                     if parent and parent.name == 'form':
                         form = parent
@@ -1233,7 +1234,7 @@ class Order:
                 return order_id
 
         except Exception as e:
-            raise LendingClubError('Could not place the order: {0}'.format(str(e)), response)
+            raise LendingClubError('Could not place the order: {0}'.format(e), response)
 
 
 class LendingClubError(Exception):

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-import sys
-import unittest
 import getpass
-from random import choice
-from logger import TestLogger
+import unittest
 from builtins import input
+from random import choice
 
+from logger import TestLogger
 
 from lendingclub import LendingClub, Order
 from lendingclub.filters import Filter
@@ -16,7 +16,6 @@ lc = LendingClub(logger=logger)
 
 
 class LiveTests(unittest.TestCase):
-
     def setUp(self):
         # Clear any existing orders
         lc.session.clear_session_order()
@@ -154,7 +153,6 @@ if res.lower() != 'yes':
 print('\n\nEnter a valid LendingClub account information...')
 email = input('Email:')
 password = getpass.getpass()
-
 
 assert lc.is_site_available(), 'No network connection or cannot access lendingclub.com'
 assert lc.authenticate(email, password), 'Could not authenticate'

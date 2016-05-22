@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-
-"""
-A dummy python logger
-"""
+# coding=utf-8
 
 """
 The MIT License (MIT)
@@ -26,13 +23,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+A dummy python logger
 """
 
 import sys
 import traceback
-#import logging
 
-class TestLogger():
+
+class TestLogger(object):
     """
     A dummy python logger that outputs everything to stdout and keeps a history of output.
     """
@@ -49,7 +48,7 @@ class TestLogger():
         self.debugs = []
 
     def info(self, msg):
-        #print '\nINVESTOR INFO: {0}\n'.format(msg)
+        # print '\nINVESTOR INFO: {0}\n'.format(msg)
         self.infos.append(msg)
 
     def error(self, msg):

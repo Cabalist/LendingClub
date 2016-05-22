@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-
-"""
-A dummy web server used to test the LendingClub API requests
-"""
+# coding=utf-8
 
 """
 The MIT License (MIT)
@@ -26,13 +23,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-"""
-import sys
-PY3 = sys.version_info > (3,)
 
-import os
+A dummy web server used to test the LendingClub API requests
+"""
+
 import json
+import os
+import sys
 from threading import Thread
+
+PY3 = sys.version_info > (3,)
 
 if PY3:
     from urllib.parse import urlparse, parse_qs
@@ -64,7 +64,8 @@ class TestServerHandler(BaseHTTPRequestHandler):
     Any other combination will fail on auth.
     """
 
-    def log(self, msg):
+    @staticmethod
+    def log(msg):
         global logging
 
         msg = 'SERVER: {0}'.format(msg)
@@ -106,7 +107,8 @@ class TestServerHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.headers_sent = True
 
-    def read_asset_file(self, file_name):
+    @staticmethod
+    def read_asset_file(file_name):
         """
         Read a file from the assets directory
         """
@@ -126,7 +128,8 @@ class TestServerHandler(BaseHTTPRequestHandler):
             self.send_headers()
         self.wfile.write(output.encode())
 
-    def add_session(self, key, value):
+    @staticmethod
+    def add_session(key, value):
         """
         Add a value to the HTTP session
         """
@@ -187,7 +190,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         path = self.path
         query = self.query
 
-        #self.log('GET {0} {1}'.format(path, query))
+        # self.log('GET {0} {1}'.format(path, query))
 
         # Summary page
         if '/account/summary.action' == path:
@@ -268,7 +271,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         Process at POST request
         """
         global http_session, session_disabled
-        #self.log('POST {0}'.format(self.path))
+        # self.log('POST {0}'.format(self.path))
         self.process_url()
         self.process_post_data()
 
@@ -276,7 +279,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
         data = self.data
         query = self.query
 
-        #self.log('Post Data {0}'.format(self.data))
+        # self.log('Post Data {0}'.format(self.data))
 
         # Login - if the email and password match, set the cookie
         if '/account/login.action' == path:
@@ -388,14 +391,14 @@ class ReusableServer(socketserver.TCPServer):
     allow_reuse_address = True
 
 
-class TestWebServer:
+class TestWebServer(object):
     """
     Simple class to start/stop the server
     """
     http = None
 
     def __init__(self):
-        #self.http = HTTPServer(('127.0.0.1', 7357), TestServerHandler)
+        # self.http = HTTPServer(('127.0.0.1', 7357), TestServerHandler)
         pass
 
     def start(self):

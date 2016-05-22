@@ -1,6 +1,31 @@
 #!/usr/bin/env python
+# coding=utf-8
+
 
 """
+The MIT License (MIT)
+
+Copyright (c) 2013 Jeremy Gillick
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+
 Filters are used to search lending club for loans to invest in. There are many filters you can use, here are some
 examples with the main `Filter` class.
 
@@ -41,43 +66,19 @@ You can also set the values on instantiation:
     >>> filters = Filter({'grades': {'B': True, 'C': True, 'D': True, 'E': True}})
 """
 
-"""
-The MIT License (MIT)
-
-Copyright (c) 2013 Jeremy Gillick
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-"""
-
+import json
 import os
 import re
-import json
+import sys
+
 from pybars import Compiler
 
-import sys
 PY3 = sys.version_info > (3,)
 if PY3:
     unicode = str
     from collections import UserDict
 else:
     from UserDict import UserDict
-
 
 
 class Filter(UserDict):
@@ -177,7 +178,7 @@ class Filter(UserDict):
             if key in to_dict:
 
                 # Make sure the values are the same datatype
-                assert type(to_dict[key]) is type(from_dict[key]), 'Data type for {0} is incorrect: {1}, should be {2}'.format(key, type(from_dict[key]), type(to_dict[key]))
+                assert isinstance(to_dict[key], type(from_dict[key])), 'Data type for {0} is incorrect: {1}, should be {2}'.format(key, type(from_dict[key]), type(to_dict[key]))
 
                 # Recursively dive into the next dictionary
                 if type(to_dict[key]) is dict:
@@ -507,47 +508,47 @@ class SavedFilter(Filter):
             # Now loop through the string until we find the end of the filter block
             # This is a simple parser that keeps track of block elements, quotes and
             # escape characters
-            blockTracker = []
-            blockChars = {
+            blocktracker = []
+            blockchars = {
                 '[': ']',
                 '{': '}'
             }
-            inQuote = False
-            lastChar = None
+            inquote = False
+            lastchar = None
             json_text = ""
             for char in text:
                 json_text += char
 
                 # Escape char
                 if char == '\\':
-                    if lastChar == '\\':
-                        lastChar = ''
+                    if lastchar == '\\':
+                        lastchar = ''
                     else:
-                        lastChar = char
+                        lastchar = char
                     continue
 
                 # Quotes
                 if char == "'" or char == '"':
-                    if inQuote is False:  # Starting a quote block
-                        inQuote = char
-                    elif inQuote == char:  # Ending a quote block
-                        inQuote = False
-                    lastChar = char
+                    if inquote is False:  # Starting a quote block
+                        inquote = char
+                    elif inquote == char:  # Ending a quote block
+                        inquote = False
+                    lastchar = char
                     continue
 
                 # Start of a block
-                if char in blockChars.keys():
-                    blockTracker.insert(0, blockChars[char])
+                if char in blockchars.keys():
+                    blocktracker.insert(0, blockchars[char])
 
                 # End of a block, remove from block path
-                elif len(blockTracker) > 0 and char == blockTracker[0]:
-                    blockTracker.pop(0)
+                elif len(blocktracker) > 0 and char == blocktracker[0]:
+                    blocktracker.pop(0)
 
                 # No more blocks in the tracker which means we're at the end of the filter block
-                if len(blockTracker) == 0 and lastChar is not None:
+                if len(blocktracker) == 0 and lastchar is not None:
                     break
 
-                lastChar = char
+                lastchar = char
 
             # Verify valid JSON
             try:
@@ -693,7 +694,6 @@ class FilterByLoanID(Filter):
     """
 
     def __init__(self, loan_id, *args, **kwargs):
-
         # Convert a list to comma delimited string
         super().__init__(*args, **kwargs)
         if type(loan_id) is list:
