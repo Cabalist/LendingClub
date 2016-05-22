@@ -57,7 +57,7 @@ class TestServerHandler(BaseHTTPRequestHandler):
 
     auth = {
         'email': 'test@test.com',
-        'password': 'supersecret'
+        'password': 'supersecret12'
     }
     """
     Dummy authenticated email and password for this LendingClub server.

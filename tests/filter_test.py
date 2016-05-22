@@ -155,7 +155,7 @@ class TestFilterValidation(unittest.TestCase):
         self.lc = LendingClub(logger=self.logger)
         self.lc.session.base_url = 'http://127.0.0.1:8000/'
         self.lc.session.set_logger(None)
-        self.lc.authenticate('test@test.com', 'supersecret')
+        self.lc.authenticate('test@test.com', 'supersecret12')
 
         response = self.lc.session.get('/filter_validation', query={'id': 1})
         json_response = response.json()
@@ -288,7 +288,7 @@ class TestSavedFilters(unittest.TestCase):
         self.lc = LendingClub(logger=self.logger)
         self.lc.session.base_url = 'http://127.0.0.1:8000/'
         self.lc.session.set_logger(None)
-        self.lc.authenticate('test@test.com', 'supersecret')
+        self.lc.authenticate('test@test.com', 'supersecret12')
 
     def tearDown(self):
         pass

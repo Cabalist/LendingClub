@@ -32,7 +32,13 @@ This will almost always be accessed through the API calls in
 import getpass
 import re
 import time as time
-from builtins import input
+import sys
+PY3 = sys.version_info > (3,)
+
+if PY3:
+    from builtins import input
+else:
+    input = raw_input
 
 import requests
 from bs4 import BeautifulSoup

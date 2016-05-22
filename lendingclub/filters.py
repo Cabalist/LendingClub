@@ -310,7 +310,7 @@ class Filter(dict):
 
         # Loan ID
         if 'loan_id' in self:
-            loan_ids = map(str, self['loan_id'])
+            loan_ids = self['loan_id'].split(",")
             if str(loan['loanGUID']) not in loan_ids:
                 raise FilterValidationError('Did not meet filter criteria for loan ID. {0} does not match {1}'.format(loan['loanGUID'], self['loan_id']), loan=loan, criteria='loan ID')
 
@@ -464,7 +464,7 @@ class SavedFilter(Filter):
         return filters
 
     def __init__(self, lc, filter_id, *args, **kwargs):
-        super(SavedFilter, self).__init__(*args, **kwargs)
+        # super(SavedFilter, self).__init__(*args, **kwargs)
         self.id = filter_id
         self.lc = lc
         self.load()
@@ -639,7 +639,7 @@ class SavedFilter(Filter):
 
                     # Add filter value
                     filter_values[name] = value
-                    self.__setitem__(name, value)
+                    dict.__setitem__(self, name, value)
 
         return filter_values
 

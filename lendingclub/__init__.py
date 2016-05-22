@@ -572,7 +572,7 @@ class LendingClub(object):
                     if frac['invest_amount'] > max_per_note:
                         raise LendingClubError('ERROR: LendingClub tried to invest ${0} in a loan note. Your max per note is set to ${1}. Portfolio investment canceled.'.format(frac['invest_amount'], max_per_note))
 
-            if fractions:
+            if not fractions:
                 self.__log('The selected portfolio didn\'t have any loans')
                 return False
             match_option['loan_fractions'] = fractions
@@ -934,7 +934,7 @@ class Order(object):
             assert 'loan_id' in loan and isinstance(loan['loan_id'], int), 'loan_id must be a number or dictionary containing a loan_id value'
             loan_id = loan['loan_id']
 
-        assert isinstance(loan_id, [str, unicode, int]), 'Loan ID must be an integer number or a string'
+        assert isinstance(loan_id, (str, unicode, int)), 'Loan ID must be an integer number or a string'
         self.loans[loan_id] = amount
 
     def update(self, loan_id, amount):
@@ -1107,7 +1107,7 @@ class Order(object):
         # LendingClub requires you to search for the loans before you can stage them
         f = FilterByLoanID(loan_ids)
         results = self.lc.search(f, limit=len(self.loans))
-        if results['loans'] or results['totalRecords'] != len(self.loans):
+        if not results['loans'] or results['totalRecords'] != len(self.loans):
             raise LendingClubError('Could not stage the loans. The number of loans in your batch does not match totalRecords. {0} != {1}'.format(len(self.loans), results['totalRecords']), results)
 
         # Stage each loan

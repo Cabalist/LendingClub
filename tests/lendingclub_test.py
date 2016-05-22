@@ -3,6 +3,7 @@
 
 
 import unittest
+from decimal import Decimal
 
 from logger import TestLogger
 from server import ServerThread
@@ -32,7 +33,7 @@ class TestLendingClub(unittest.TestCase):
 
     def test_cash_balance(self):
         cash = self.lc.get_cash_balance()
-        self.assertEqual(cash, 216.02)
+        self.assertEqual(cash, Decimal('216.02'))
 
     def test_portfolios(self):
         portfolios = self.lc.get_portfolio_list()
